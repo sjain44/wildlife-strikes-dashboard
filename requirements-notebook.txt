@@ -1,0 +1,5 @@
+-r requirements.txt
+python-calamine==0.9.1
+kaleido==1.5.1
+jupyter
+playwright

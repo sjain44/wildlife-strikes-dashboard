@@ -1,0 +1,13 @@
+# Render Blueprint. On render.com choose New > Blueprint and pick this repo.
+services:
+  - type: web
+    name: wildlife-strikes
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # one worker keeps memory under the free plan's 512 MB (each process uses about 250 MB)
+    startCommand: gunicorn app:server --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
