@@ -70,3 +70,7 @@ button.card-reset {
   padding: 4px 10px; font: inherit; font-size: 12px; color: var(--muted); cursor: pointer;
 }
 button.card-reset:hover { border-color: var(--accent); color: var(--accent); }
+
+/* map zoom tools */
+.map-tools { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; margin: 8px 8px 0; font-size: 13px; }
+@media (max-width: 900px) { .map-tools { grid-template-columns: 1fr; } }

@@ -209,8 +209,14 @@ def _rgba(hex_color, alpha):
 
 
 # ---------------------------------------------------------------- 5. point map
-def airport_map(sub, airport=None, species=None, min_reports=5):
-    """Airports sized by number of strikes, coloured by share that caused damage (point map)."""
+def airport_map(sub, airport=None, species=None, min_reports=5, bounds=None, place=None):
+    """Airports sized by number of strikes, coloured by share that caused damage (point map).
+
+    `bounds` is (lat_min, lat_max, lon_min, lon_max). When given, the map zooms to that box
+    and also shows small airports, so a single county's airports are easy to pick.
+    """
+    if bounds is not None:
+        min_reports = 1
     d = sub.dropna(subset=["lat", "lon"])
     known = d["damage"].ne("Not reported")
     g = (d.assign(known=known)
@@ -233,9 +239,20 @@ def airport_map(sub, airport=None, species=None, min_reports=5):
         hovertemplate="<b>%{customdata[0]}</b> %{customdata[1]}, %{customdata[2]}<br>"
                       "%{customdata[3]:,} strikes, %{customdata[4]:.1f}% damaging<extra>click to filter</extra>",
     )
-    _layout(fig, f"Where ({label(species)}, airports with {min_reports}+ reports). Click one to filter", height=420)
-    fig.update_geos(scope="usa", showland=True, landcolor="#f5f7fa", subunitcolor="#d9dee3",
-                    showlakes=False, bgcolor="white")
+    where = f"zoomed to {place}" if place else f"airports with {min_reports}+ reports"
+    _layout(fig, f"Where ({label(species)}, {where}). Click one to filter", height=420)
+    fig.update_geos(showland=True, landcolor="#f5f7fa", subunitcolor="#d9dee3", showlakes=False,
+                    bgcolor="white", showsubunits=True)
+    if bounds is None:
+        fig.update_geos(scope="usa")  # Albers USA, with Alaska and Hawaii as insets
+    else:
+        # the Albers USA projection ignores axis ranges, so a zoomed view switches to Mercator
+        lat0, lat1, lon0, lon1 = bounds
+        fig.update_geos(scope="north america", projection_type="mercator", resolution=50,
+                        showcountries=True, countrycolor="#9aa5b1", subunitcolor="#9aa5b1", subunitwidth=0.8,
+                        showlakes=True, lakecolor="#e3eef8", showcoastlines=True, coastlinecolor="#9aa5b1",
+                        showocean=True, oceancolor="#e3eef8",
+                        lataxis_range=[lat0, lat1], lonaxis_range=[lon0, lon1])
     return fig
 
 

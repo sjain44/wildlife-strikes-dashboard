@@ -23,14 +23,18 @@ def kpis(page):
     return [page.inner_text(f"#{k}") for k in ("k-strikes", "k-damaging", "k-height", "k-night")]
 
 
-def pick_species(page, name):
+def pick(page, dropdown_id, text):
     # Dash 4 dropdowns open a popover with their own search box
-    page.click("#species")
-    page.fill(".dash-dropdown-search", name)
+    page.click(f"#{dropdown_id}")
+    page.fill(".dash-dropdown-search", text)
     page.wait_for_timeout(400)
-    page.locator("[role=option]", has_text=name).first.click()
+    page.locator("[role=option]", has_text=text).first.click()
     page.keyboard.press("Escape")
     settle(page)
+
+
+def pick_species(page, name):
+    pick(page, "species", name)
 
 
 with sync_playwright() as p:
@@ -110,6 +114,20 @@ with sync_playwright() as p:
     page.click("#reset")
     settle(page)
     print("after reset", kpis(page))
+
+    # 6. map tools: zoom to a state, find an airport, then clear both with the map's reset button
+    pick(page, "map-state", "Michigan")
+    print("zoom to Michigan", page.locator("#map .gtitle").text_content(), kpis(page))
+    print("map zoom buttons", page.locator("#map .modebar-btn[data-title='Zoom in']").count(),
+          page.locator("#map .modebar-btn[data-title='Zoom out']").count())
+    page.locator("#map").screenshot(path=OUT / "09_map_michigan.png")
+    pick(page, "airport-pick", "Detroit Metro")
+    print("find Detroit", kpis(page), page.inner_text("#airport-chip"))
+    page.locator("#map").locator("..").screenshot(path=OUT / "10_map_detroit.png")
+    page.click("#map ~ .card-footer .card-reset")
+    settle(page)
+    print("map reset", kpis(page), repr(page.inner_text("#airport-chip")),
+          page.locator("#map .gtitle").text_content())
 
     # 5. phone width
     page.set_viewport_size({"width": 390, "height": 844})

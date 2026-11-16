@@ -258,11 +258,12 @@ The linking only takes two callbacks. The first one turns clicks into filter val
 | Pick a species in the dropdown | all six charts and all four numbers |
 | Click a bar or a ridgeline median dot | picks that species, so everything again |
 | Drag the year slider | all six charts (the trend chart shades the years you picked) |
-| Click an airport on the map | filters the other five charts to that airport |
+| Click an airport on the map, or type one into Find an airport | filters the other five charts to that airport and zooms the map to its state |
+| Zoom to a state (above the map) | zooms the map so single airports are easy to pick |
 | A chart's own reset button | clears just that chart's filter (Show all years, Clear species, Clear airport) |
 | Hit Reset all | clears everything |
 
-Each chart also shows a small toolbar on hover with a button to reset its zoom.
+Each chart also shows a small toolbar on hover with a button to reset its zoom. The map keeps its + and - zoom buttons visible all the time and also zooms with the scroll wheel. Once it is zoomed in, it switches from the national map projection to a regular one and shows lakes and state borders, so you can find something like Detroit Metro in Wayne County, Michigan.
 
 Each chart ignores the one filter that would make it useless. The trend chart always shows every year so the shaded band has something to compare to. The map always shows every airport so you can click a different one. The bar chart and ridgeline always show every species, because that is where you pick one.
 """)
@@ -371,10 +372,10 @@ I used Claude (in Claude Code) throughout and checked its work against the data,
 **Entry 4. No way to reset filters**
 - Tool: Claude
 - What I asked for / what I was trying to do: let people undo a filter on any chart.
-- What came back / what happened: the first version only had one Reset all button, and it hid Plotly's toolbar.
-- What was wrong or could be better: you could not clear just one chart's filter, and a zoomed-in map had no way back.
+- What came back / what happened: the first version only had one Reset all button, hid Plotly's toolbar, and showed the whole country on the map with no way to zoom.
+- What was wrong or could be better: you could not clear just one chart's filter, and picking one airport (like Detroit Metro in Wayne County) out of a crowded national map was nearly impossible.
 - How I noticed: clicking around the live dashboard.
-- What I did instead: added a reset button under every chart (Show all years, Clear species, Clear airport), turned the toolbar back on for hover so zoom can be reset, and tested every button with the Playwright script.
+- What I did instead: added a reset button under every chart (Show all years, Clear species, Clear airport), brought the toolbar back, and added scroll zoom, a Zoom to a state dropdown and a searchable Find an airport box to the map. The Playwright script tests every one of them.
 """)
 
 # =====================================================================================
@@ -388,7 +389,7 @@ Here is how to do it yourself.
 2. Sign up at render.com with your GitHub account, then click **New** and choose **Blueprint**.
 3. Pick your repo. Render reads `render.yaml`, which tells it to install `requirements.txt` with Python 3.12 and start the app with `gunicorn app:server`. That is why `app.py` has the line `server = app.server`.
 4. Click **Apply** and wait a few minutes for the first build. The app then shows up at a link like `https://wildlife-strikes.onrender.com`.
-5. Open the link in a private window and click a bar, a ridgeline dot, an airport and a reset button to make sure everything works without installing anything.
+5. Open the link in a private window and click a bar, a ridgeline dot, an airport, the map zoom and a reset button to make sure everything works without installing anything.
 
 I run only one worker with four threads, because each Python process uses about 250 MB and the free plan has 512 MB. Every time I push to GitHub, Render rebuilds the app automatically.
 

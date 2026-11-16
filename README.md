@@ -7,7 +7,7 @@ Pilots report around 20,000 wildlife strikes a year, and almost all of them are 
 3. **When in the year, and how high up, does each animal get hit?**
 4. **Where, and in which part of the flight, does the damage happen?**
 
-Six linked charts answer them, a line chart, a polar bar chart, a grouped bar chart, a ridgeline, a Sankey diagram and a map. Pick a species, drag the year range, or click a bar, a ridgeline median dot or an airport, and everything updates together. Every chart also has its own reset button. The biggest surprise came from clicking around. Snow geese are only 0.06% of reports, but 77% of their strikes cause damage, and they happen in winter, at night and around 2,000 ft, while most strikes happen in summer near the ground.
+Six linked charts answer them, a line chart, a polar bar chart, a grouped bar chart, a ridgeline, a Sankey diagram and a map. Pick a species, drag the year range, or click a bar, a ridgeline median dot or an airport, and everything updates together. Every chart has its own reset button, and the map can zoom to a state or search for an airport (try Detroit Metro in Wayne County, Michigan). The biggest surprise came from clicking around. Snow geese are only 0.06% of reports, but 77% of their strikes cause damage, and they happen in winter, at night and around 2,000 ft, while most strikes happen in summer near the ground.
 
 - **Live dashboard** https://wildlife-strikes.onrender.com (free hosting, so the first load can take up to a minute)
 - **Video walkthrough** YOUR-VIDEO-LINK
