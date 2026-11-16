@@ -53,6 +53,21 @@ with sync_playwright() as p:
     for gid in ("radial", "ridge"):
         page.locator(f"#{gid}").screenshot(path=OUT / f"05_snow_goose_{gid}.png")
 
+    # 1b. hover a ridgeline median dot -> the label must stay inside the chart
+    dot = page.locator("#ridge .scatterlayer .point").last
+    dot.hover(force=True)
+    page.wait_for_timeout(500)
+    label = page.locator("#ridge .hoverlayer .hovertext").bounding_box()
+    graph = page.locator("#ridge").bounding_box()
+    inside = label and label["x"] >= graph["x"] and label["x"] + label["width"] <= graph["x"] + graph["width"]
+    print("ridge hover label inside chart", bool(inside), page.locator("#ridge .hoverlayer").text_content().replace(chr(10), " | "))
+    page.locator("#ridge").screenshot(path=OUT / "08_ridge_hover.png")
+
+    # 1c. the polar chart's own reset button clears the species
+    page.click("#radial ~ .card-footer .card-reset")
+    settle(page)
+    print("after polar card reset", kpis(page), page.locator("#species").inner_text())
+
     # 2. click a bar -> species changes (top bar = the most damaging species)
     bars = page.locator("#bar .trace.bars").nth(1).locator(".point path")
     bars.last.click(force=True)
@@ -68,11 +83,14 @@ with sync_playwright() as p:
     settle(page)
     print("after map click", kpis(page), page.inner_text("#airport-chip"))
     page.screenshot(path=OUT / "06_airport_filter.png", full_page=True)
+    page.click("#map ~ .card-footer .card-reset")
+    settle(page)
+    print("after map card reset", kpis(page), repr(page.inner_text("#airport-chip")))
 
     # 4. click a ridge -> species changes
     page.click("#reset")
     settle(page)
-    page.locator("#ridge .trace.violins path.violin").last.click(force=True)
+    page.locator("#ridge .scatterlayer .point").last.click(force=True)
     settle(page)
     print("after ridge click", kpis(page), page.locator("#species").inner_text())
 
@@ -86,6 +104,9 @@ with sync_playwright() as p:
     box.press("Tab")  # the input commits on blur
     settle(page)
     print("years 2015+", kpis(page))
+    page.click("#trend ~ .card-footer .card-reset")
+    settle(page)
+    print("after trend card reset", kpis(page))
     page.click("#reset")
     settle(page)
     print("after reset", kpis(page))

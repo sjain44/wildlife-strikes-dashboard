@@ -6,7 +6,7 @@ In production gunicorn serves `app:server`.
 from pathlib import Path
 
 import pandas as pd
-from dash import Dash, Input, Output, State, ctx, dcc, html, no_update
+from dash import ALL, Dash, Input, Output, State, ctx, dcc, html, no_update
 
 import charts as C
 
@@ -26,10 +26,23 @@ app = Dash(__name__, title="Wildlife Strikes Dashboard")
 server = app.server  # for gunicorn
 
 
-def card(graph_id, note):
+GRAPH_CONFIG = {
+    "displayModeBar": "hover",   # shows a small toolbar with the reset-view button on hover
+    "displaylogo": False,
+    "modeBarButtonsToRemove": ["select2d", "lasso2d", "toImage", "autoScale2d"],
+}
+RESET_LABELS = {"species": "Clear species", "years": "Show all years", "airport": "Clear airport"}
+
+
+def card(graph_id, note, resets):
+    """A chart, a one-line note, and a reset button for the filter this chart controls."""
     return html.Div(className="card", children=[
-        dcc.Graph(id=graph_id, config={"displayModeBar": False}),
-        html.P(note, className="note"),
+        dcc.Graph(id=graph_id, config=GRAPH_CONFIG),
+        html.Div(className="card-footer", children=[
+            html.P(note, className="note"),
+            html.Button(RESET_LABELS[resets], className="card-reset", n_clicks=0,
+                        id={"type": "card-reset", "chart": graph_id, "target": resets}),
+        ]),
     ])
 
 
@@ -41,10 +54,23 @@ def kpi(kpi_id, caption):
 app.layout = html.Div(className="page", children=[
     html.Header(children=[
         html.H1("Which animals actually damage aircraft, and when?"),
-        html.P(["360,000 wildlife strikes reported to the FAA, 1990 to 2026. Pick a species, drag the "
-                "year range, or click a bar, ridge or airport. Every chart updates together. ",
-                html.A("Data: FAA National Wildlife Strike Database",
-                       href="https://wildlife.faa.gov/search", target="_blank")]),
+        html.P("Pilots report about 20,000 wildlife strikes a year, but only a few of them damage the plane. "
+               "This dashboard helps you answer four questions."),
+        html.Ol(className="questions", children=[
+            html.Li([html.B("Is it getting more dangerous, or are people just reporting more? "),
+                     "Drag the year range and compare the two lines."]),
+            html.Li([html.B("Which animals are rare but cause most of the damage? "),
+                     "Look for a long dark bar next to a short grey one."]),
+            html.Li([html.B("When in the year, and how high up, does each animal get hit? "),
+                     "Pick a species and watch the polar chart and the ridgeline."]),
+            html.Li([html.B("Where, and in which part of the flight, does the damage happen? "),
+                     "Follow the Sankey, then click an airport on the map."]),
+        ]),
+        html.P(className="how", children=[
+            "Pick a species, drag the years, or click a bar, a median dot or an airport. Every chart updates "
+            "together, and each chart has its own reset button. Data from the ",
+            html.A("FAA National Wildlife Strike Database", href="https://wildlife.faa.gov/search",
+                   target="_blank"), ", 1990 to 2026."]),
     ]),
     html.Div(className="controls", children=[
         html.Div(className="control species", children=[
@@ -70,12 +96,12 @@ app.layout = html.Div(className="page", children=[
         kpi("k-night", "at night (of reports that say)"),
     ]),
     html.Div(className="grid", children=[
-        card("trend", "Line chart. The shaded band is the selected year range."),
-        card("radial", "Polar bar chart. Each wedge is the share of the year's strikes in that month."),
-        card("bar", "Grouped bars. A long dark bar next to a short grey one means a rare but damaging animal."),
-        card("ridge", "Ridgeline. Each ridge is a smoothed distribution of strike height, ordered by median."),
-        card("sankey", "Sankey. Band width is the number of strikes. Hover a band for counts."),
-        card("map", "Point map. Circle size is strikes, colour is the share that caused damage."),
+        card("trend", "Line chart. The shaded band is the selected year range.", "years"),
+        card("radial", "Polar bar chart. Each wedge is the share of the year's strikes in that month.", "species"),
+        card("bar", "Grouped bars. Click a species to select it.", "species"),
+        card("ridge", "Ridgeline of strike height. Hover or click a median dot.", "species"),
+        card("sankey", "Sankey. Band width is the number of strikes. Hover a band for counts.", "species"),
+        card("map", "Point map. Size is strikes, colour is share damaging. Click an airport to filter.", "airport"),
     ]),
     html.Footer("Built with Plotly and Dash. Reporting is voluntary, so counts are reports, not all strikes. "
                 "2026 is a partial year."),
@@ -85,15 +111,22 @@ app.layout = html.Div(className="page", children=[
 @app.callback(
     Output("species", "value"), Output("years", "value"), Output("airport", "data"),
     Input("bar", "clickData"), Input("ridge", "clickData"), Input("map", "clickData"),
-    Input("reset", "n_clicks"),
+    Input("reset", "n_clicks"), Input({"type": "card-reset", "chart": ALL, "target": ALL}, "n_clicks"),
     State("species", "value"), State("airport", "data"),
     prevent_initial_call=True,
 )
-def handle_clicks(bar_click, ridge_click, map_click, _reset, species, airport):
-    """Clicks on one chart become filters for all the others."""
+def handle_clicks(bar_click, ridge_click, map_click, _reset, _card_resets, species, airport):
+    """Clicks on one chart become filters for all the others. Reset buttons clear them."""
     trigger = ctx.triggered_id
     if trigger == "reset":
         return C.ALL, [YEAR_MIN, YEAR_MAX], None
+    if isinstance(trigger, dict) and trigger.get("type") == "card-reset":
+        if not ctx.triggered[0]["value"]:      # ignore the buttons being created
+            return no_update, no_update, no_update
+        target = trigger["target"]
+        return (C.ALL if target == "species" else no_update,
+                [YEAR_MIN, YEAR_MAX] if target == "years" else no_update,
+                None if target == "airport" else no_update)
     if trigger == "bar" and bar_click:
         sp = bar_click["points"][0]["y"]
         return (C.ALL if sp == species else sp), no_update, no_update

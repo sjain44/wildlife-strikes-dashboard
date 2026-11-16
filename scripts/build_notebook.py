@@ -55,9 +55,14 @@ md(f"""
 md(f"""
 ## 1. Introduction
 
-Every year pilots report around 20,000 times their plane hit a bird or some other animal. Most of the time nothing happens. So I got curious about the few strikes that actually do damage. Which animals cause them, and do they show up at the same time of year, at the same height and during the same part of the flight as all the harmless ones?
+Every year pilots report around 20,000 times their plane hit a bird or some other animal. Most of the time nothing happens. So I got curious about the few strikes that actually do damage, and built a dashboard around four questions.
 
-I built a dashboard to find out. You pick a species, a range of years or an airport, and six charts update together to tell you the story.
+1. **Is flying getting more dangerous, or are people just reporting more strikes?**
+2. **Which animals are rare but cause most of the damage?**
+3. **When in the year, and how high up, does each animal get hit?**
+4. **Where, and in which part of the flight, does the damage happen?**
+
+You pick a species, a range of years or an airport, and six charts update together to answer them.
 
 {img("03_full_layout.png", "Finished dashboard")}
 """, images=["03_full_layout.png"])
@@ -236,10 +241,12 @@ app.layout = html.Div(className="page", children=[
                                              html.Button("Reset all", id="reset")]),
     dcc.Store(id="airport"),                       # holds the airport picked on the map
     html.Div(className="kpis", children=[...]),
-    html.Div(className="grid", children=[card("trend", ...), card("radial", ...), card("bar", ...),
-                                         card("ridge", ...), card("sankey", ...), card("map", ...)]),
+    html.Div(className="grid", children=[card("trend", note, "years"), card("radial", note, "species"),
+                                         card("bar", note, "species"), card("ridge", note, "species"),
+                                         card("sankey", note, "species"), card("map", note, "airport")]),
 ])
 ```
+Each `card` holds a chart, a one-line note and a reset button for the filter that chart controls.
 """)
 
 md("""
@@ -249,10 +256,13 @@ The linking only takes two callbacks. The first one turns clicks into filter val
 | What you do | What updates |
 | --- | --- |
 | Pick a species in the dropdown | all six charts and all four numbers |
-| Click a bar or a ridge | picks that species, so everything again |
+| Click a bar or a ridgeline median dot | picks that species, so everything again |
 | Drag the year slider | all six charts (the trend chart shades the years you picked) |
 | Click an airport on the map | filters the other five charts to that airport |
+| A chart's own reset button | clears just that chart's filter (Show all years, Clear species, Clear airport) |
 | Hit Reset all | clears everything |
+
+Each chart also shows a small toolbar on hover with a button to reset its zoom.
 
 Each chart ignores the one filter that would make it useless. The trend chart always shows every year so the shaded band has something to compare to. The map always shows every airport so you can click a different one. The bar chart and ridgeline always show every species, because that is where you pick one.
 """)
@@ -332,39 +342,39 @@ The map had one more surprise. Clicking Denver showed a second airport, `KDEN*`,
 md("""
 ## 6. AI log and troubleshooting
 
-I used Claude (in Claude Code) to help search for datasets, write the cleaning and chart code, and run a browser to test the app. I checked everything it gave me against the data, the screenshots and the library itself. All four entries below are about something that went wrong.
+I used Claude (in Claude Code) throughout and checked its work against the data, the live app and the library. Entries 3 and 4 are the problems.
 
-**Entry 1. Mixed-up column types broke the save**
+**Entry 1. Evaluating data sources**
 - Tool: Claude
-- What I asked for / what I was trying to do: turn the 159 MB Excel file into a parquet file so it loads quickly.
-- What came back / what happened: a script that ended with `df.to_parquet(...)`.
-- What was wrong or could be better: it crashed with `ArrowTypeError ... column AIRPORT_ID`, because that column has both numbers and text in it.
-- How I noticed: the error message.
-- What I did instead: turned every text column into a clean string before saving. That also fixed some extra spaces hiding in `AC_CLASS`.
+- What I asked for / what I was trying to do: compare public datasets that could support four chart types, linked filters and a non-obvious finding.
+- What came back / what happened: a shortlist (FAA wildlife strikes, Nobel laureates, Ember electricity data) with licenses, column richness and question ideas.
+- What was wrong or could be better: it was not sure the FAA file was still downloadable, and one question it suggested (repair cost by species) only works for 1.5% of reports.
+- How I noticed: I found the real "Download Excel" link on the FAA site and profiled how complete every column was.
+- What I did instead: picked the FAA data and measured harm with damage level (65% complete) instead of cost.
 
-**Entry 2. One setting squished every chart**
+**Entry 2. Hosting**
 - Tool: Claude
-- What I asked for / what I was trying to do: a first layout with six charts in a grid.
-- What came back / what happened: every chart had `config={"responsive": True}`.
-- What was wrong or could be better: that setting makes a chart fill the height of its box, and my boxes had no height, so all six charts ended up a few pixels tall.
-- How I noticed: the first screenshot just showed squished titles.
-- What I did instead: removed the setting so each chart uses its own height.
+- What I asked for / what I was trying to do: host the dashboard from my GitHub repo.
+- What came back / what happened: it pointed out that GitHub Pages cannot run a Python server and set up Render with `render.yaml` instead.
+- What was wrong or could be better: nothing broke, but the free plan has 512 MB of memory and two app workers would not fit.
+- How I noticed: I measured the app at about 250 MB per process.
+- What I did instead: run one worker with four threads.
 
-**Entry 3. A chart title that said too much**
+**Entry 3. Chart rendering and wrong text**
 - Tool: Claude
-- What I asked for / what I was trying to do: a title for the trend chart that states the takeaway.
-- What came back / what happened: "Reports keep rising. Damaging strikes do not."
-- What was wrong or could be better: damaging strikes did rise, from about 486 to 719 a year. That is a lot slower than reports, but it is not flat, so the title was misleading. An earlier idea to compare repair costs had the same kind of problem, since only 1.5% of reports include a cost.
-- How I noticed: I made the table by decade and the list of how complete each column is before writing this up.
-- What I did instead: switched to a neutral title, put the real numbers in the text, and used damage level instead of cost.
+- What I asked for / what I was trying to do: build and title the six charts.
+- What came back / what happened: three specific errors. A `responsive=True` setting squished every chart to a few pixels tall. The trend title said damaging strikes "do not" rise. And the ridgeline hover box was hard to read and spilled outside the chart.
+- What was wrong or could be better: the layout broke, the title was false (damaging strikes rose from about 486 to 719 a year, just slower than reports), and the hover was unusable.
+- How I noticed: the first screenshot, my decade table, and using the live app myself.
+- What I did instead: removed the setting, used a neutral title with the real numbers in the text, and moved the hover to one dot per ridge at the median with a short white label.
 
-**Entry 4. Old knowledge of the new Dash controls**
+**Entry 4. No way to reset filters**
 - Tool: Claude
-- What I asked for / what I was trying to do: a test that picks a species and types in a year range.
-- What came back / what happened: code that typed into the dropdown the old way and used `fill()` on the year box.
-- What was wrong or could be better: Dash 4 replaced both controls. The dropdown now has its own search box, and the year box only updates when you click away. So nothing actually changed, but the test still passed.
-- How I noticed: the printed numbers stayed stuck at 360,376.
-- What I did instead: looked at the page's HTML, typed into `.dash-dropdown-search` and clicked the option, and pressed Tab after typing the year.
+- What I asked for / what I was trying to do: let people undo a filter on any chart.
+- What came back / what happened: the first version only had one Reset all button, and it hid Plotly's toolbar.
+- What was wrong or could be better: you could not clear just one chart's filter, and a zoomed-in map had no way back.
+- How I noticed: clicking around the live dashboard.
+- What I did instead: added a reset button under every chart (Show all years, Clear species, Clear airport), turned the toolbar back on for hover so zoom can be reset, and tested every button with the Playwright script.
 """)
 
 # =====================================================================================
@@ -378,7 +388,7 @@ Here is how to do it yourself.
 2. Sign up at render.com with your GitHub account, then click **New** and choose **Blueprint**.
 3. Pick your repo. Render reads `render.yaml`, which tells it to install `requirements.txt` with Python 3.12 and start the app with `gunicorn app:server`. That is why `app.py` has the line `server = app.server`.
 4. Click **Apply** and wait a few minutes for the first build. The app then shows up at a link like `https://wildlife-strikes.onrender.com`.
-5. Open the link in a private window and click a bar, a ridge and an airport to make sure everything works without installing anything.
+5. Open the link in a private window and click a bar, a ridgeline dot, an airport and a reset button to make sure everything works without installing anything.
 
 I run only one worker with four threads, because each Python process uses about 250 MB and the free plan has 512 MB. Every time I push to GitHub, Render rebuilds the app automatically.
 

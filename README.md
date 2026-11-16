@@ -1,6 +1,13 @@
 # Which animals actually damage aircraft, and when?
 
-Pilots report around 20,000 wildlife strikes a year, and almost all of them are harmless. This dashboard digs into the few that are not. It uses 360,000 strike reports from the FAA (1990 to 2026) and six linked charts, a line chart, a polar bar chart, a grouped bar chart, a ridgeline, a Sankey diagram and a map. Pick a species, drag the year range, or click a bar, a ridge or an airport, and everything updates together. The biggest surprise came from clicking around. Snow geese are only 0.06% of reports, but 77% of their strikes cause damage, and they happen in winter, at night and around 2,000 ft, while most strikes happen in summer near the ground.
+Pilots report around 20,000 wildlife strikes a year, and almost all of them are harmless. This dashboard digs into the few that are not, using 360,000 FAA strike reports from 1990 to 2026. It is built around four questions.
+
+1. **Is flying getting more dangerous, or are people just reporting more strikes?**
+2. **Which animals are rare but cause most of the damage?**
+3. **When in the year, and how high up, does each animal get hit?**
+4. **Where, and in which part of the flight, does the damage happen?**
+
+Six linked charts answer them, a line chart, a polar bar chart, a grouped bar chart, a ridgeline, a Sankey diagram and a map. Pick a species, drag the year range, or click a bar, a ridgeline median dot or an airport, and everything updates together. Every chart also has its own reset button. The biggest surprise came from clicking around. Snow geese are only 0.06% of reports, but 77% of their strikes cause damage, and they happen in winter, at night and around 2,000 ft, while most strikes happen in summer near the ground.
 
 - **Live dashboard** https://wildlife-strikes.onrender.com (free hosting, so the first load can take up to a minute)
 - **Video walkthrough** YOUR-VIDEO-LINK

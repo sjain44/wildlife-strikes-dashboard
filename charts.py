@@ -26,7 +26,9 @@ def _layout(fig, title, height=360, **kw):
         title=dict(text=title, x=0.01, xanchor="left", font=dict(size=15, color=INK)),
         font=dict(family=FONT, size=12, color=INK),
         paper_bgcolor="white", plot_bgcolor="white",
-        margin=dict(l=10, r=10, t=56, b=10), height=height, **kw,
+        margin=dict(l=10, r=10, t=56, b=10), height=height,
+        hoverlabel=dict(bgcolor="white", bordercolor=GRID, font=dict(family=FONT, size=12, color=INK), align="left"),
+        **kw,
     )
     return fig
 
@@ -136,6 +138,7 @@ def height_ridgeline(context, species=None, n=10, min_reports=40):
     order = air.groupby("species", observed=True)["height_ft"].median().sort_values().index.tolist()
 
     fig = go.Figure()
+    medians = []
     for sp in order:
         h = air.loc[air["species"].eq(sp), "height_ft"]
         hit = sp == species
@@ -144,14 +147,24 @@ def height_ridgeline(context, species=None, n=10, min_reports=40):
             width=1.9, points=False, spanmode="hard", meanline_visible=False,
             line=dict(color=ACCENT if hit else BASE, width=1.6 if hit else 1),
             fillcolor=ACCENT if hit else "rgba(82,96,109,0.18)", opacity=0.9 if hit else 1,
-            hoveron="violins",
-            hovertemplate=f"<b>{sp}</b><br>median {h.median():,.0f} ft<br>{len(h):,} airborne strikes<extra></extra>",
+            hoverinfo="skip",  # the ridge's own hover box floats far outside the plot
         )
-    _layout(fig, "How high each species gets hit (airborne strikes, log scale)", height=420,
-            showlegend=False)
+        medians.append((sp, h.median(), len(h), hit))
+    # one dot per ridge at the median carries a short hover label that stays inside the chart
+    m = pd.DataFrame(medians, columns=["species", "median", "n", "hit"])
+    fig.add_scatter(
+        x=np.log10(m["median"]), y=m["species"], mode="markers",
+        marker=dict(size=8, color=np.where(m["hit"], INK, "white"), line=dict(color=INK, width=1.5)),
+        customdata=m[["median", "n"]],
+        hovertemplate="<b>%{y}</b><br>median %{customdata[0]:,.0f} ft<br>%{customdata[1]:,} airborne strikes<extra></extra>",
+    )
+    _layout(fig, "How high each species gets hit (airborne strikes, log scale, dot = median)", height=420,
+            showlegend=False, hovermode="closest")
     fig.update_xaxes(tickvals=np.log10(TICKS), ticktext=["1 ft", "10", "100", "1,000", "10,000 ft"],
                      gridcolor=GRID, zeroline=False, range=[0, 4.5])
-    fig.update_yaxes(categoryorder="array", categoryarray=order, showgrid=False, tickfont=dict(size=11))
+    # leave room above the top ridge so its curve is not clipped
+    fig.update_yaxes(categoryorder="array", categoryarray=order, showgrid=False, tickfont=dict(size=11),
+                     range=[-0.5, len(order) + 0.4])
     return fig
 
 
