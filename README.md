@@ -42,7 +42,11 @@ To rebuild the data and the notebook, run `pip install -r requirements-notebook.
 
 ## Hosting
 
-A Dash app needs a Python server, so it cannot run on GitHub Pages. It runs on [Render](https://render.com) instead. On Render, choose **New**, then **Blueprint**, and pick this repo. `render.yaml` handles the rest, and every push to `main` redeploys the app.
+A Dash app needs a Python server, so it cannot run on GitHub Pages. It runs on [Render](https://render.com) instead.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sjain44/wildlife-strikes-dashboard)
+
+Click the button (or on Render choose **New**, then **Blueprint**, and pick this repo). `render.yaml` handles the rest, and every push to `main` redeploys the app.
 
 ## Built with
 
