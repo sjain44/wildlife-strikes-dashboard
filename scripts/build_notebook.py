@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 IMG = ROOT / "images"
 OUT = ROOT / "wildlife_strikes_dashboard.ipynb"
 
-LIVE_URL = "https://wildlife-strikes.onrender.com"
+LIVE_URL = "https://wildlife-strikes-2zcv.onrender.com"
 REPO_URL = "https://github.com/sjain44/wildlife-strikes-dashboard"
 VIDEO_URL = "YOUR-VIDEO-LINK"
 
@@ -401,10 +401,10 @@ Here is how to do it yourself.
 1. Put the project on GitHub. The repo needs `app.py`, `charts.py`, `assets/`, `data/strikes_clean.parquet`, `requirements.txt` and `render.yaml`.
 2. Sign up at render.com with your GitHub account, then click **New** and choose **Blueprint**.
 3. Pick your repo. Render reads `render.yaml`, which tells it to install `requirements.txt` with Python 3.12 and start the app with `gunicorn app:server`. That is why `app.py` has the line `server = app.server`.
-4. Click **Apply** and wait a few minutes for the first build. The app then shows up at a link like `https://wildlife-strikes.onrender.com`.
+4. Click **Apply** and wait a few minutes for the first build. The app then shows up at a link like `https://wildlife-strikes-2zcv.onrender.com`. Render adds a random ending like `-2zcv` when the plain name is already taken, so check the link on your service page.
 5. Open the link in a private window and click a bar, a ridgeline dot, an airport, the map zoom and a reset button to make sure everything works without installing anything.
 
-I run only one worker with four threads, because each Python process uses about 250 MB and the free plan has 512 MB. Every time I push to GitHub, Render rebuilds the app automatically.
+I run only one worker with four threads, because each Python process uses about 250 MB and the free plan has 512 MB. Render is supposed to rebuild the app every time I push to GitHub, but at first my updates never showed up. If that happens, open the service on Render and use **Manual Deploy**, then **Deploy latest commit**, and make sure **Auto-Deploy** is on in the settings.
 
 To run it on your own computer instead, use `pip install -r requirements.txt` and then `python app.py`, and open http://127.0.0.1:8050. To rebuild the data from scratch, install `requirements-notebook.txt` and run `python prepare_data.py`.
 """)

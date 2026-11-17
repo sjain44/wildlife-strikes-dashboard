@@ -11,7 +11,7 @@ Six linked charts answer them, a line chart, a polar bar chart, a grouped bar ch
 
 ![Dashboard filtered to Detroit Metro, 2016 to 2025](images/story_1_dtw.png)
 
-- **Live dashboard** https://wildlife-strikes.onrender.com (free hosting, so the first load can take up to a minute)
+- **Live dashboard** https://wildlife-strikes-2zcv.onrender.com (free hosting, so the first load can take up to a minute)
 - **Video walkthrough** YOUR-VIDEO-LINK
 - **Narrative notebook** [`wildlife_strikes_dashboard.ipynb`](wildlife_strikes_dashboard.ipynb) (also as [HTML](wildlife_strikes_dashboard.html))
 
