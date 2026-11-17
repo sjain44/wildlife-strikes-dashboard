@@ -3,7 +3,7 @@
 How much do Canada geese affect planes at Detroit Metro? A linked Plotly + Dash dashboard of 360,000 FAA wildlife strike reports (1990 to 2026) with six charts that filter together by species, years and airport. The full story is in the notebook.
 
 - **Live dashboard** https://wildlife-strikes-2zcv.onrender.com (may take a minute to wake up)
-- **Video** [wildlife_strikes_walkthrough.mp4](video/wildlife_strikes_walkthrough.mp4) (2 min 47 s walkthrough)
+- **Video** https://cdn.jsdelivr.net/gh/sjain44/wildlife-strikes-dashboard@main/video/wildlife_strikes_walkthrough.mp4 (plays in the browser, 2 min 47 s, file in [video/](video/wildlife_strikes_walkthrough.mp4))
 - **Notebook** [wildlife_strikes_dashboard.ipynb](wildlife_strikes_dashboard.ipynb) ([HTML](wildlife_strikes_dashboard.html))
 
 ![Dashboard](images/03_full_layout.png)

@@ -15,7 +15,7 @@ OUT = ROOT / "wildlife_strikes_dashboard.ipynb"
 
 LIVE_URL = "https://wildlife-strikes-2zcv.onrender.com"
 REPO_URL = "https://github.com/sjain44/wildlife-strikes-dashboard"
-VIDEO_URL = "https://github.com/sjain44/wildlife-strikes-dashboard/blob/main/video/wildlife_strikes_walkthrough.mp4"
+VIDEO_URL = "https://cdn.jsdelivr.net/gh/sjain44/wildlife-strikes-dashboard@main/video/wildlife_strikes_walkthrough.mp4"
 
 steps = {}
 for block in re.split(r"^# %% step: ", (ROOT / "prepare_data.py").read_text(encoding="utf-8"), flags=re.M)[1:]:
