@@ -1,13 +1,15 @@
 # Which animals actually damage aircraft, and when?
 
-Pilots report around 20,000 wildlife strikes a year, and almost all of them are harmless. This dashboard digs into the few that are not, using 360,000 FAA strike reports from 1990 to 2026. It is built around four questions.
+It started with a fall in Michigan. I kept seeing flocks of Canada geese flying over my place near Detroit Metro Airport and wondered how much they actually affect the planes going in and out. To find out, I built this dashboard on 360,000 FAA wildlife strike reports from 1990 to 2026. It is built around four questions.
 
 1. **Is flying getting more dangerous, or are people just reporting more strikes?**
 2. **Which animals are rare but cause most of the damage?**
 3. **When in the year, and how high up, does each animal get hit?**
 4. **Where, and in which part of the flight, does the damage happen?**
 
-Six linked charts answer them, a line chart, a polar bar chart, a grouped bar chart, a ridgeline, a Sankey diagram and a map. Pick a species, drag the year range, or click a bar, a ridgeline median dot or an airport, and everything updates together. Every chart has its own reset button, and the map can zoom to a state or search for an airport (try Detroit Metro in Wayne County, Michigan). The biggest surprise came from clicking around. Snow geese are only 0.06% of reports, but 77% of their strikes cause damage, and they happen in winter, at night and around 2,000 ft, while most strikes happen in summer near the ground.
+Six linked charts answer them, a line chart, a polar bar chart, a grouped bar chart, a ridgeline, a Sankey diagram and a map. Pick a species, drag the year range, or click a bar, a ridgeline median dot or an airport, and everything updates together. Every chart has its own reset button, and the map can zoom to a state or search for an airport (try Detroit Metro in Wayne County, Michigan). The answer surprised me. Across the US, Canada geese cause damage in about half of their strikes. But at Detroit Metro from 2016 to 2025 they were only 8 of 2,679 strikes, none in fall, with one minor damage report. The animals that actually damaged planes at DTW were snowy owls (every one of them between November and March), red-tailed hawks and gulls.
+
+![Dashboard filtered to Detroit Metro, 2016 to 2025](images/story_1_dtw.png)
 
 - **Live dashboard** https://wildlife-strikes.onrender.com (free hosting, so the first load can take up to a minute)
 - **Video walkthrough** YOUR-VIDEO-LINK

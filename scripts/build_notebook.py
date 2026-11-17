@@ -55,14 +55,16 @@ md(f"""
 md(f"""
 ## 1. Introduction
 
-Every year pilots report around 20,000 times their plane hit a bird or some other animal. Most of the time nothing happens. So I got curious about the few strikes that actually do damage, and built a dashboard around four questions.
+It is fall in Michigan, and lately I keep seeing big V's of Canada geese flying over my place. I live near Detroit Metro Airport (DTW), so planes are coming in and out over the same fields and ponds the geese use. That got me wondering. **How much have Canada geese actually affected planes flying in and out of Detroit Metro over the past 10 years?**
+
+To answer that I needed more than one chart. I needed to see Detroit next to the rest of the country, geese next to every other animal, and fall next to the rest of the year. So I built a dashboard on the FAA's wildlife strike data around four broader questions.
 
 1. **Is flying getting more dangerous, or are people just reporting more strikes?**
 2. **Which animals are rare but cause most of the damage?**
 3. **When in the year, and how high up, does each animal get hit?**
 4. **Where, and in which part of the flight, does the damage happen?**
 
-You pick a species, a range of years or an airport, and six charts update together to answer them.
+You pick a species, a range of years or an airport, and six charts update together to answer them. The short answer to my geese question surprised me, and it is in section 5.
 
 {img("03_full_layout.png", "Finished dashboard")}
 """, images=["03_full_layout.png"])
@@ -184,7 +186,7 @@ md("""
 """)
 code("""
 import plotly.express as px
-keep = ['Barn swallow', 'Mourning dove', 'Gulls', 'Canada goose', 'Turkey vulture', 'Snow goose']
+keep = ['Barn swallow', 'Mourning dove', 'Gulls', 'Canada goose', 'Turkey vulture', 'Snowy owl']
 air = df[df['airborne'] & df['species'].isin(keep)].copy()
 air['species'] = air['species'].astype(str)
 box = px.box(air, x='height_ft', y='species', log_x=True, points=False,
@@ -193,13 +195,14 @@ box.update_traces(marker_color=C.BASE).update_layout(height=330, template='simpl
 box.show()
 """)
 code("""
-C.height_ridgeline(df, species='Snow goose').show()
+C.height_ridgeline(df, species='Canada goose').show()
 """)
 md("""
-**Polar bars vs a line chart.** Snow goose strikes peak from November through January. On a normal January-to-December line, that peak gets cut in half, with one piece at the far left and the other at the far right. On the polar chart it stays in one piece, and you can see it sitting right on top of the summer peak for all other strikes.
+**Polar bars vs a line chart.** At Detroit Metro, snowy owl strikes run from November through March. On a normal January-to-December line, that season gets cut in two, with one piece at the far left and the other at the far right. On the polar chart it stays in one piece, sitting on the opposite side of the circle from DTW's summer peak.
 """)
 code("""
-C.seasonal_radial(df, species='Snow goose').show()
+dtw_ten = df[df['airport_id'].eq('KDTW') & df['year'].between(2016, 2025)]
+C.seasonal_radial(dtw_ten, species='Snowy owl').show()
 """)
 md("""
 **Sankey vs a stacked bar.** A stacked bar can show damage by flight phase or damage by animal size, but not both at once. The Sankey follows each strike through both steps. You can see large animals flowing mostly into approach and landing, and that is where most of the orange damage bands start.
@@ -289,9 +292,9 @@ phone scroll width 390, console errors []
 md("""
 ### What I found
 
-**The questions I started with.** Do strikes peak during migration, and is it the same peak for every animal? Which animals are rare but do a lot of the damage? Are strikes higher up worse? And if reports keep going up, does that mean flying is getting more dangerous?
+**Where I started.** My real question was about the geese I see over Detroit every fall. How often do they hit planes at DTW, do those hits do damage, and is fall the dangerous time? I also wanted to know whether the rising number of strike reports nationwide means flying is getting more dangerous.
 
-**The rising line is mostly more reporting.** When I dragged the year slider from the 1990s to the 2020s, the number of reports went up about six times, from around 3,100 a year to 18,500 a year. Damaging strikes only went up about one and a half times, from 486 to 719 a year. The share of strikes that caused damage dropped from 19.2% to 6.5%. So airports are just reporting a lot more of the small stuff, and the rising line does not mean flying got more dangerous.
+**First, the national trend is mostly more reporting.** When I dragged the year slider from the 1990s to the 2020s, reports went up about six times, from around 3,100 a year to 18,500 a year. Damaging strikes only went up about one and a half times, from 486 to 719 a year, and the share that caused damage dropped from 19.2% to 6.5%. Airports are reporting a lot more of the small stuff, so a rising line does not mean flying got more dangerous. That matters for Detroit too, because a busy, careful airport will report lots of harmless strikes.
 """)
 code("""
 decades = {'1990-99': (1990, 1999), '2000-09': (2000, 2009), '2010-19': (2010, 2019), '2020-25': (2020, 2025)}
@@ -305,39 +308,49 @@ for name, (a, b) in decades.items():
                   'damage field filled': f"{known.mean():.0%}"}
 pd.DataFrame(rows).T
 """)
-md("""
-**Things that did not work out.** At first I wanted to use repair cost to measure harm, but it turns out only 1.5% of reports even fill it in, so I used the damage level instead (65% filled in). I also expected the map to point out dangerous airports. It did not. The big circles mostly show which airports file lots of reports, and the busy ones actually have lower damage rates (a Spearman correlation of minus 0.34 across airports with at least 100 reports). On top of that, 40% of reports do not name the species and half do not give a height, so each chart title says exactly what it includes.
-
-**The finding I only got by clicking around.** Looking at all species together, the season peaks from July to September, the typical strike happens at 600 ft, 31% happen at night and 9.6% cause damage. Then I picked **Snow goose** in the dropdown and every chart changed at once.
-""")
 md(f"""
-{img("04_snow_goose.png", "Snow goose selected")}
-""", images=["04_snow_goose.png"])
+**Zooming in on Detroit Metro.** I set the years to 2016 to 2025 (the last 10 full years), typed KDTW into the new Find an airport box, and the whole dashboard switched to Detroit. DTW reported 2,679 strikes in those 10 years. The polar chart shows they pile up in summer, with 43% in July and August alone. Fall (September to November) is 25%, and the fall strikes are mostly mourning doves, horned larks and killdeer, not geese.
+
+{img("story_1_dtw.png", "Dashboard filtered to Detroit Metro, 2016 to 2025")}
+""", images=["story_1_dtw.png"])
+md(f"""
+**Then I picked Canada goose.** The headline number dropped to **8**. In 10 years, only 8 of DTW's 2,679 strikes were Canada geese, which is 0.3%. None of them happened in September, October or November. Only one caused any damage, a minor one in August 2017 when a plane hit a small group of geese while landing at dusk. I double-checked that geese were not hiding under other labels. DTW has no other goose or "geese" entries, the nearby airports (Willow Run, Pontiac, Detroit City) report no geese at all, and the 8 "Unknown bird, large" strikes could be anything.
+
+{img("story_2_dtw_goose_trend.png", "Canada goose strikes at DTW by year")}
+""", images=["story_2_dtw_goose_trend.png"])
+md(f"""
+**So are geese harmless? Not at all.** When I cleared the airport and kept Canada goose selected for 2016 to 2025, the national picture was completely different. There were 707 Canada goose strikes across the US, and 53% of the ones that reported damage had some. 25 caused substantial damage or destroyed something, and 38% involved more than one goose, because they fly in flocks. Nationally their peak is August and September (24% of goose strikes), right as they start moving around for fall. The Sankey shows those big birds flowing into approach and landing and then into the orange damage bands. Zooming the map to Michigan shows only 22 Canada goose strikes in the whole state over those 10 years, and 8 of them are DTW's.
+
+{img("story_3_us_goose_radial.png", "Canada goose season, US")} {img("story_3_us_goose_sankey.png", "Canada goose Sankey, US")}
+{img("story_3_michigan_goose_map.png", "Canada goose strikes in Michigan")}
+""", images=["story_3_us_goose_radial.png", "story_3_us_goose_sankey.png", "story_3_michigan_goose_map.png"])
 code("""
 def profile(sub):
     known = sub['damage'].ne('Not reported'); tod = sub['time_of_day'].ne('Not reported')
     months = sub['month'].value_counts(normalize=True)
     return {'reports': len(sub),
-            'damaging share': f"{sub['damaging'].sum() / known.sum():.1%}",
-            'median airborne height (ft)': sub.loc[sub['airborne'], 'height_ft'].median(),
-            'at night': f"{sub['time_of_day'].eq('Night').sum() / tod.sum():.0%}",
-            'Nov-Jan share': f"{months.reindex([11, 12, 1]).sum():.0%}",
-            'Jul-Aug share': f"{months.reindex([7, 8]).fillna(0).sum():.0%}"}
+            'damaging (of reports that say)': f"{sub['damaging'].sum()} of {known.sum()}",
+            'fall share (Sep-Nov)': f"{months.reindex([9, 10, 11]).fillna(0).sum():.0%}",
+            'summer share (Jul-Aug)': f"{months.reindex([7, 8]).fillna(0).sum():.0%}",
+            'winter share (Dec-Mar)': f"{months.reindex([12, 1, 2, 3]).fillna(0).sum():.0%}"}
 
-pd.DataFrame({'All strikes': profile(df),
-              'Snow goose': profile(df[df['species'].eq('Snow goose')]),
-              'White-tailed deer': profile(df[df['species'].eq('White-tailed deer')]),
-              'Brazilian free-tailed bat': profile(df[df['species'].eq('Brazilian free-tailed bat')])})
+ten = df[df['year'].between(2016, 2025)]
+dtw = ten[ten['airport_id'].eq('KDTW')]
+pd.DataFrame({'DTW, every animal': profile(dtw),
+              'DTW, Canada goose': profile(dtw[dtw['species'].eq('Canada goose')]),
+              'US, Canada goose': profile(ten[ten['species'].eq('Canada goose')]),
+              'DTW, snowy owl': profile(dtw[dtw['species'].eq('Snowy owl')])})
 """)
 md(f"""
-Snow geese are only 0.06% of all reports, so they basically disappear in any chart of everything. Once I selected them, the polar chart flipped to winter, with 62% of their strikes from November to January and none at all in July or August. Their ridge jumped to the very top at a typical height of 2,000 ft. 73% of their strikes happen at night, and 77% cause damage. The map lit up California, Missouri, Tennessee and Nebraska, which sit right under big waterfowl migration routes. I never would have drawn a snow goose chart on purpose, because there are almost a thousand species in this data. The only reason I found it is that I could click around.
+**What actually damages planes at DTW.** Back on Detroit with all species, the bar chart answers this right away. The top two are **snowy owls** and **red-tailed hawks**, with 4 damaging strikes each, then herring gulls with 3. Snowy owls really stood out. They are under 1% of DTW's strikes but about 15% of its damaging strikes where the species is known, and when I selected them the polar chart flipped to winter. All 22 of DTW's snowy owl strikes happened between November and March, with 9 in March alone. Two of them did substantial damage. That is a pattern I never would have thought to look for. I only found it because the bar chart reacted to the airport filter.
 
-Comparing a few more animals showed me what is really going on. Deer cause damage 86% of the time, at a typical height of 4 ft, mostly at night while the plane is landing. Free-tailed bats get hit at night even more often (84%), but they cause damage only 1% of the time. So night and height are not dangerous on their own. Size is what matters, and the Sankey shows big animals feeding straight into the damage bands.
+{img("story_4_dtw_snowy_owl_radial.png", "Snowy owl strikes at DTW by month")}
+""", images=["story_4_dtw_snowy_owl_radial.png"])
+md("""
+**Things that did not work out.** I wanted to compare how high geese get hit at DTW, but the ridgeline came up blank. Only 29% of DTW's reports include a height, which works out to a handful per species, so now the chart says that instead of drawing nothing. Only 32% of DTW reports fill in the damage field, so its damage rates come from a small subset. Repair cost would have been a better measure of harm, but only 1.5% of reports nationwide include it. And the national map did not point out dangerous airports. The big circles mostly show which airports file lots of reports, and busy airports actually have lower damage rates (Spearman correlation of minus 0.34 across airports with at least 100 reports).
 
-The map had one more surprise. Clicking Denver showed a second airport, `KDEN*`, sitting right on top of it. It is the old Stapleton airport. 91 of its 92 reports are from 1990 to 1994, and their 19% damage rate matches the early-years pattern from the trend chart. The last report is dated 2025, which has to be a typo, since Stapleton closed in 1995.
-
-{img("06_airport_filter.png", "Airport filter")}
-""", images=["06_airport_filter.png"])
+**My answer.** Over the past 10 years, Canada geese have had very little impact on planes at Detroit Metro. They were 8 strikes out of 2,679, none in fall, and one minor damage report. That is not because geese are safe. Across the country they cause damage in about half of their strikes, and they peak right in late summer and fall. At DTW the damage instead comes from snowy owls in winter, hawks and gulls. The data cannot say why Detroit sees so few goose strikes. My guesses are the airport's wildlife management, or the geese I see simply using fields and ponds away from the runways, but I would need other data to check either one. A static chart of all strikes would have shown none of this. It only came out by filtering to one airport, one decade and one species at a time.
+""")
 
 # =====================================================================================
 md("""
@@ -364,10 +377,10 @@ I used Claude (in Claude Code) throughout and checked its work against the data,
 **Entry 3. Chart rendering and wrong text**
 - Tool: Claude
 - What I asked for / what I was trying to do: build and title the six charts.
-- What came back / what happened: three specific errors. A `responsive=True` setting squished every chart to a few pixels tall. The trend title said damaging strikes "do not" rise. And the ridgeline hover box was hard to read and spilled outside the chart.
+- What came back / what happened: four specific errors. A `responsive=True` setting squished every chart to a few pixels tall. The trend title said damaging strikes "do not" rise. The ridgeline hover box was hard to read and spilled outside the chart. And when I filtered to Detroit, the ridgeline went completely blank because no species had enough heights.
 - What was wrong or could be better: the layout broke, the title was false (damaging strikes rose from about 486 to 719 a year, just slower than reports), and the hover was unusable.
-- How I noticed: the first screenshot, my decade table, and using the live app myself.
-- What I did instead: removed the setting, used a neutral title with the real numbers in the text, and moved the hover to one dot per ridge at the median with a short white label.
+- How I noticed: the first screenshot, my decade table, using the live app myself, and the Detroit screenshots.
+- What I did instead: removed the setting, used a neutral title with the real numbers in the text, moved the hover to one dot per ridge at the median with a short white label, and made the ridgeline explain when there are too few heights to draw.
 
 **Entry 4. No way to reset filters**
 - Tool: Claude

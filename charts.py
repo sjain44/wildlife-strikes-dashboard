@@ -129,15 +129,30 @@ def height_ridgeline(context, species=None, n=10, min_reports=40):
     one-sided violin (a KDE) so the shapes stack without overlapping.
     """
     air = context[context["airborne"] & ~context["unknown_species"].astype(bool)]
-    counts = air["species"].value_counts()
-    counts = counts[counts >= min_reports]
+    all_counts = air["species"].value_counts()
+    # filtered to one airport, few species reach 40 airborne strikes, so step the bar down
+    for min_n in (min_reports, 15, 8):
+        counts = all_counts[all_counts >= min_n]
+        if len(counts) >= 3:
+            break
+    else:
+        counts = counts.iloc[:0]   # too few heights to draw honest shapes
     chosen = list(counts.index[:n])
-    if species not in (None, ALL) and species not in chosen and counts.get(species, 0) >= 5:
+    if species not in (None, ALL) and species not in chosen and all_counts.get(species, 0) >= 5:
         chosen.append(species)
     air = air[air["species"].isin(chosen)]
     order = air.groupby("species", observed=True)["height_ft"].median().sort_values().index.tolist()
 
     fig = go.Figure()
+    if not order:
+        _layout(fig, "How high each species gets hit (airborne strikes, log scale)", height=420)
+        fig.add_annotation(text=f"Only {len(context[context['airborne']]):,} airborne strikes here report a height."
+                                "<br>That is too few to draw a height curve for each species.",
+                           showarrow=False, font=dict(color=MUTED, size=13), x=0.5, y=0.5,
+                           xref="paper", yref="paper")
+        fig.update_xaxes(visible=False)
+        fig.update_yaxes(visible=False)
+        return fig
     medians = []
     for sp in order:
         h = air.loc[air["species"].eq(sp), "height_ft"]
