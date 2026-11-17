@@ -8,14 +8,9 @@ How much do Canada geese affect planes at Detroit Metro? A linked Plotly + Dash 
 
 ![Dashboard](images/03_full_layout.png)
 
-## Run locally
+## Deploy your own
 
-```bash
-pip install -r requirements.txt
-python app.py    # http://127.0.0.1:8050
-```
-
-`python prepare_data.py` rebuilds `data/strikes_clean.parquet` from the raw FAA download.
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/sjain44/wildlife-strikes-dashboard)
 
 ## Data
 
