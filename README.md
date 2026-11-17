@@ -20,3 +20,7 @@ python app.py    # http://127.0.0.1:8050
 ## Data
 
 [FAA National Wildlife Strike Database](https://wildlife.faa.gov/search). US government work, public domain.
+
+## Built with
+
+Plotly 7.1, Dash 4.5, pandas and gunicorn, hosted on Render. I used Claude to help with code and testing, and the notebook's AI log covers where it helped and where I had to fix its mistakes.
